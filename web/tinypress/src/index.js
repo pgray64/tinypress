@@ -1,13 +1,31 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import reportWebVitals from "./reportWebVitals";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AuthRouteOutlet } from "./partials/global/authRouteOutlet";
+import Setup from "./pages/entrance/setup";
+import DashboardHome from "./pages/account/dashboard";
+import SignIn from "./services/api/entrance/signIn";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="setup" element={<Setup />} />
+        <Route path="sign-in" element={<SignIn />} />
+
+        {/* Authenticated routes here */}
+        <Route element={<AuthRouteOutlet />}>
+          <Route path="dashboard" element={<DashboardHome />} />
+        </Route>
+
+        {/* Catch-all to redirect to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>
 );
 
