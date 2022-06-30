@@ -26,19 +26,19 @@ func main() {
 	e := route.InitRoutes()
 
 	// Perform migration if specified to do so
-	if conf.Secrets.AutoMigrate == "1" || strings.ToLower(conf.Secrets.AutoMigrate) == "true" {
-		if err := database.MigrateDatabase(); err != nil {
-			e.Logger.Fatal("Database auto-migration failed: ", err)
-		}
+	if conf.Secrets.SkipSchemaCreation == "1" || strings.ToLower(conf.Secrets.SkipSchemaCreation) == "true" {
+		e.Logger.Info("Skipping database schema creation due to ENV variable setting")
 	} else {
-		e.Logger.Info("Skipping database auto-migrate due to ENV variable setting")
+		if err := database.MigrateDatabase(); err != nil {
+			e.Logger.Fatal("Database schema creation failed: ", err)
+		}
 	}
 
-	port := ":80"
+	port := ":1323"
 	if len(conf.Secrets.SitePort) > 0 {
 		_, err := strconv.Atoi(conf.Secrets.SitePort)
 		if err != nil {
-			e.Logger.Fatal("Invalid port specified - it should be a number: ")
+			e.Logger.Fatal("Invalid port specified - it should be a number ")
 		}
 		port = ":" + conf.Secrets.SitePort
 	}

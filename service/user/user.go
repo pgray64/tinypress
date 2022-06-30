@@ -1,5 +1,5 @@
 /*
-Package database is for database handling in the Tinypress application
+Package user is for user account management
 
 Copyright 2022 Philippe Gray
 
@@ -11,33 +11,20 @@ Tinypress is distributed in the hope that it will be useful, but WITHOUT ANY WAR
 
 You should have received a copy of the GNU General Public License along with Tinypress. If not, see <https://www.gnu.org/licenses/>.
 */
-package database
+package user
 
 import (
-	"github.com/pgray64/tinypress/service/settings"
-	"github.com/pgray64/tinypress/service/user"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"time"
 )
 
-var Database *gorm.DB
-
-func InitDatabase(connStr string, debugSql bool) (err error) {
-	var logMode = logger.Error
-	if debugSql {
-		logMode = logger.Info
-	}
-	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{
-		Logger: logger.Default.LogMode(logMode),
-	})
-	Database = db
-	return err
-}
-
-func MigrateDatabase() error {
-	return Database.AutoMigrate(
-		&settings.Settings{},
-		&user.User{},
-	)
+type User struct {
+	ID           int64     `gorm:"primaryKey;autoIncrement"`
+	DisplayName  string    `gorm:"not null;size:100"`
+	Email        string    `gorm:"uniqueIndex:idx_users_email,where:deleted_at is null;not null;size:255"`
+	Username     string    `gorm:"uniqueIndex:idx_users_username,where:deleted_at is null;not null;size:255"`
+	PasswordHash string    `gorm:"not null"`
+	CreatedAt    time.Time `gorm:"autoCreateTime"`
+	UpdatedAt    time.Time `gorm:"autoUpdateTime"`
+	DeletedAt    gorm.DeletedAt
 }

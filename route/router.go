@@ -68,7 +68,7 @@ func InitRoutes() *echo.Echo {
 	}))
 	// Static content
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
-		Root:   "web/tinypress-vue/dist",
+		Root:   "web/tinypress/build",
 		Index:  "index.html",
 		Browse: false,
 		HTML5:  true,

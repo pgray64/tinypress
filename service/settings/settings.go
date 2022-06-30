@@ -1,5 +1,5 @@
 /*
-Package database is for database handling in the Tinypress application
+Package settings is for site-wide configuration settings
 
 Copyright 2022 Philippe Gray
 
@@ -11,33 +11,9 @@ Tinypress is distributed in the hope that it will be useful, but WITHOUT ANY WAR
 
 You should have received a copy of the GNU General Public License along with Tinypress. If not, see <https://www.gnu.org/licenses/>.
 */
-package database
+package settings
 
-import (
-	"github.com/pgray64/tinypress/service/settings"
-	"github.com/pgray64/tinypress/service/user"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-)
-
-var Database *gorm.DB
-
-func InitDatabase(connStr string, debugSql bool) (err error) {
-	var logMode = logger.Error
-	if debugSql {
-		logMode = logger.Info
-	}
-	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{
-		Logger: logger.Default.LogMode(logMode),
-	})
-	Database = db
-	return err
-}
-
-func MigrateDatabase() error {
-	return Database.AutoMigrate(
-		&settings.Settings{},
-		&user.User{},
-	)
+type Settings struct {
+	Active   bool   `gorm:"primaryKey"`
+	SiteName string `gorm:"not null;size:100" `
 }

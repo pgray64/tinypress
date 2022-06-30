@@ -16,14 +16,14 @@ package conf
 import "os"
 
 type secrets struct {
-	SessionSecret string
-	RedisConn     string
-	PostgresConn  string
-	AutoMigrate   string
-	SendgridKey   string
-	SiteUrl       string
-	SitePort      string
-	DebugSql      string
+	SessionSecret      string
+	RedisConn          string
+	PostgresConn       string
+	SkipSchemaCreation string
+	SendgridKey        string
+	SiteUrl            string
+	SitePort           string
+	DebugSql           string
 }
 
 var Secrets secrets
@@ -35,13 +35,13 @@ const (
 
 func InitSecrets() {
 	Secrets = secrets{
-		SessionSecret: os.Getenv("TP_SESSION_SECRET"),
-		RedisConn:     os.Getenv("TP_REDIS_CONN"),
-		PostgresConn:  os.Getenv("TP_POSTGRES_CONN"),
-		AutoMigrate:   os.Getenv("TP_AUTO_MIGRATE"),
-		SendgridKey:   os.Getenv("TP_SENDGRID_KEY"),
-		SiteUrl:       os.Getenv("TP_SITE_URL"),
-		SitePort:      os.Getenv("TP_SITE_PORT"),
-		DebugSql:      os.Getenv("TP_DEBUG_SQL"),
+		SessionSecret:      os.Getenv("TP_SESSION_SECRET"),
+		RedisConn:          os.Getenv("TP_REDIS_CONN"),
+		PostgresConn:       os.Getenv("TP_POSTGRES_CONN"),
+		SkipSchemaCreation: os.Getenv("TP_SKIP_SCHEMA_CREATION"),
+		SendgridKey:        os.Getenv("TP_SENDGRID_KEY"),
+		SiteUrl:            os.Getenv("TP_SITE_URL"),
+		SitePort:           os.Getenv("TP_SITE_PORT"),
+		DebugSql:           os.Getenv("TP_DEBUG_SQL"),
 	}
 }
