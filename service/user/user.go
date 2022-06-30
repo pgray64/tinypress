@@ -1,5 +1,5 @@
 /*
-Package user is for user account management
+Package user is for services related to user accounts
 
 Copyright 2022 Philippe Gray
 
@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along with Tin
 package user
 
 import (
+	"errors"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgerrcode"
+	"github.com/pgray64/tinypress/database"
 	"gorm.io/gorm"
 	"time"
 )
@@ -22,9 +26,19 @@ type User struct {
 	ID           int64     `gorm:"primaryKey;autoIncrement"`
 	DisplayName  string    `gorm:"not null;size:100"`
 	Email        string    `gorm:"uniqueIndex:idx_users_email,where:deleted_at is null;not null;size:255"`
-	Username     string    `gorm:"uniqueIndex:idx_users_username,where:deleted_at is null;not null;size:255"`
+	Username     string    `gorm:"uniqueIndex:idx_users_username,where:deleted_at is null;not null;size:100"`
 	PasswordHash string    `gorm:"not null"`
 	CreatedAt    time.Time `gorm:"autoCreateTime"`
 	UpdatedAt    time.Time `gorm:"autoUpdateTime"`
 	DeletedAt    gorm.DeletedAt
+}
+
+func (user User) Create() (isDup bool, err error) {
+	insertRes := database.Database.Create(&user)
+	var pgErr *pgconn.PgError
+
+	if insertRes.Error != nil && errors.As(insertRes.Error, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+		return isDup, nil
+	}
+	return false, insertRes.Error
 }

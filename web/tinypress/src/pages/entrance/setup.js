@@ -89,7 +89,7 @@ export default function Setup() {
       password: data.get("password"),
     }).then(
       () => {
-        // navigate("/dashboard", { replace: true });
+        navigate("/dashboard", { replace: true });
       },
       (err) => {
         setServerError(err.response?.data?.message ?? "An error occurred.");

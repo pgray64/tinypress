@@ -31,6 +31,7 @@ var Secrets secrets
 const (
 	SessionKey       = "tp_session"
 	SessionUserIdKey = "user_id"
+	BcryptCost       = 10
 )
 
 func InitSecrets() {

@@ -1,5 +1,5 @@
 /*
-Package settings is for site-wide configuration settings
+Package settings is for services related to settings
 
 Copyright 2022 Philippe Gray
 
@@ -13,7 +13,26 @@ You should have received a copy of the GNU General Public License along with Tin
 */
 package settings
 
+import (
+	"errors"
+	"github.com/pgray64/tinypress/database"
+)
+
 type Settings struct {
 	Active   bool   `gorm:"primaryKey"`
 	SiteName string `gorm:"not null;size:100" `
+}
+
+func (settings Settings) Create() error {
+	if !settings.Active {
+		return errors.New("inserting an inactive setting entry is now allowed")
+	}
+	insertRes := database.Database.Create(&settings)
+	return insertRes.Error
+}
+
+func SiteExists() (bool, error) {
+	var count int64
+	countRes := database.Database.Model(&Settings{}).Count(&count)
+	return count > 0, countRes.Error
 }

@@ -1,5 +1,5 @@
 /*
-Package database is for database handling in the Tinypress application
+Package main is for the entrypoint of the Tinypress application
 
 Copyright 2022 Philippe Gray
 
@@ -11,24 +11,17 @@ Tinypress is distributed in the hope that it will be useful, but WITHOUT ANY WAR
 
 You should have received a copy of the GNU General Public License along with Tinypress. If not, see <https://www.gnu.org/licenses/>.
 */
-package database
+package main
 
 import (
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"github.com/pgray64/tinypress/database"
+	"github.com/pgray64/tinypress/service/settings"
+	"github.com/pgray64/tinypress/service/user"
 )
 
-var Database *gorm.DB
-
-func InitDatabase(connStr string, debugSql bool) (err error) {
-	var logMode = logger.Error
-	if debugSql {
-		logMode = logger.Info
-	}
-	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{
-		Logger: logger.Default.LogMode(logMode),
-	})
-	Database = db
-	return err
+func migrateDatabase() error {
+	return database.Database.AutoMigrate(
+		&settings.Settings{},
+		&user.User{},
+	)
 }

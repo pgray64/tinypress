@@ -22,6 +22,7 @@ import (
 	"github.com/pgray64/tinypress/authentication"
 	"github.com/pgray64/tinypress/conf"
 	"github.com/pgray64/tinypress/database"
+	"github.com/pgray64/tinypress/route/entrance"
 	"net/http"
 	"strings"
 )
@@ -83,7 +84,7 @@ func InitRoutes() *echo.Echo {
 	/********************************************* PUBLIC ROUTES ******************************************************/
 	publicRoutes := e.Group("/api/public/v1/")
 
-	publicRoutes.POST("sign-up", func(c echo.Context) error { return echo.ErrNotFound })
+	publicRoutes.POST("site-setup", entrance.SiteSetup)
 
 	return e
 }

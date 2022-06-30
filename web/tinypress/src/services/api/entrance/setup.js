@@ -14,9 +14,9 @@ import api from "../api";
 
 const baseUrl = "/api/public/v1/";
 
-export function setup({ websiteName, displayName, username, email, password }) {
-  return api.post(baseUrl + "setup", {
-    websiteName,
+export function setup({ siteName, displayName, username, email, password }) {
+  return api.post(baseUrl + "site-setup", {
+    siteName,
     displayName,
     username,
     email,

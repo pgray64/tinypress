@@ -15,8 +15,7 @@ package main
 
 import (
 	"github.com/pgray64/tinypress/conf"
-	database "github.com/pgray64/tinypress/database"
-	route "github.com/pgray64/tinypress/route"
+	"github.com/pgray64/tinypress/route"
 	"strconv"
 	"strings"
 )
@@ -29,7 +28,7 @@ func main() {
 	if conf.Secrets.SkipSchemaCreation == "1" || strings.ToLower(conf.Secrets.SkipSchemaCreation) == "true" {
 		e.Logger.Info("Skipping database schema creation due to ENV variable setting")
 	} else {
-		if err := database.MigrateDatabase(); err != nil {
+		if err := migrateDatabase(); err != nil {
 			e.Logger.Fatal("Database schema creation failed: ", err)
 		}
 	}
