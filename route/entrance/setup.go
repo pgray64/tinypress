@@ -17,6 +17,7 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/pgray64/tinypress/conf"
+	"github.com/pgray64/tinypress/service/media"
 	"github.com/pgray64/tinypress/service/settings"
 	"github.com/pgray64/tinypress/service/user"
 	"golang.org/x/crypto/bcrypt"
@@ -25,11 +26,16 @@ import (
 )
 
 type siteSetupForm struct {
-	SiteName    string `json:"siteName" validate:"required"`
-	DisplayName string `json:"displayName" validate:"required"`
-	Email       string `json:"email" validate:"required,email"`
-	Username    string `json:"username" validate:"required,alphanum"`
-	Password    string `json:"password" validate:"required"`
+	SiteName           string `json:"siteName" validate:"required,max=100"`
+	DisplayName        string `json:"displayName" validate:"required,max=100"`
+	Email              string `json:"email" validate:"required,email,max=255"`
+	Username           string `json:"username" validate:"required,alphanum,max=100"`
+	Password           string `json:"password" validate:"required"`
+	SmtpServer         string `json:"smtpServer" validate:"required,max=255"`
+	SmtpUsername       string `json:"smtpUsername" validate:"required,max=255"`
+	SmtpPassword       string `json:"smtpPassword" validate:"required,max=255"`
+	SmtpPort           string `json:"smtpPort" validate:"required,max=16"`
+	ImageDirectoryPath string `json:"imageDirectoryPath" validate:"required,max=255"`
 }
 
 func SiteSetup(c echo.Context) error {
@@ -51,9 +57,20 @@ func SiteSetup(c echo.Context) error {
 	}
 
 	var newSettings = settings.Settings{
-		Active:   true,
-		SiteName: strings.TrimSpace(formData.SiteName),
+		Active:             true,
+		SiteName:           strings.TrimSpace(formData.SiteName),
+		ImageDirectoryPath: strings.TrimRight(formData.ImageDirectoryPath, "/\\"),
+		SmtpServer:         formData.SmtpServer,
+		SmtpUsername:       formData.SmtpUsername,
+		SmtpPassword:       formData.SmtpPassword,
+		SmtpPort:           formData.SmtpPort,
 	}
+
+	// Abort setup if image directory is unwritable
+	if !media.TestImageDirectoryPath(newSettings.ImageDirectoryPath) {
+		return echo.NewHTTPError(http.StatusBadRequest, "Image directory test failed - ensure it exists and allows read and write access")
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(formData.Password), conf.BcryptCost)
 	if err != nil {
 		return echo.ErrInternalServerError

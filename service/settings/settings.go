@@ -19,8 +19,13 @@ import (
 )
 
 type Settings struct {
-	Active   bool   `gorm:"primaryKey"`
-	SiteName string `gorm:"not null;size:100" `
+	Active             bool   `gorm:"primaryKey"`
+	SiteName           string `gorm:"not null;size:100"`
+	SmtpServer         string `gorm:"not null;size:255"`
+	SmtpUsername       string `gorm:"not null;size:255"`
+	SmtpPassword       string `gorm:"not null;size:255"`
+	SmtpPort           string `gorm:"not null;size:16"`
+	ImageDirectoryPath string `gorm:"not null;size:255"`
 }
 
 func (settings Settings) Create() error {

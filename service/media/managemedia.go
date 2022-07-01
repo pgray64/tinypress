@@ -1,4 +1,6 @@
 /*
+Package media is for services related to media storage and management
+
 Copyright 2022 Philippe Gray
 
 This file is part of Tinypress.
@@ -9,33 +11,40 @@ Tinypress is distributed in the hope that it will be useful, but WITHOUT ANY WAR
 
 You should have received a copy of the GNU General Public License along with Tinypress. If not, see <https://www.gnu.org/licenses/>.
 */
+package media
 
-import api from "../api";
+import (
+	"github.com/google/uuid"
+	"os"
+	"path/filepath"
+)
 
-const baseUrl = "/api/public/v1/";
+func TestImageDirectoryPath(imageDirectoryPath string) bool {
+	randPart, err := uuid.NewRandom()
+	if err != nil {
+		return false
+	}
+	fileName := "test_" + randPart.String()
+	fullPath := filepath.Join(imageDirectoryPath, fileName)
 
-export function setup({
-  siteName,
-  displayName,
-  imageDirectoryPath,
-  username,
-  email,
-  password,
-  smtpServer,
-  smtpUsername,
-  smtpPassword,
-  smtpPort,
-}) {
-  return api.post(baseUrl + "site-setup", {
-    siteName,
-    displayName,
-    imageDirectoryPath,
-    username,
-    email,
-    password,
-    smtpServer,
-    smtpUsername,
-    smtpPassword,
-    smtpPort,
-  });
+	// Ensure can write
+	f, err := os.Create(fullPath)
+	defer f.Close()
+	if err != nil {
+		return false
+	}
+
+	// Ensure can read
+	_, err = os.ReadFile(fullPath)
+	if err != nil {
+		return false
+	}
+
+	// Ensure can delete
+	err = os.Remove(fullPath)
+	if err != nil {
+		return false
+	}
+
+	return true
 }
