@@ -22,6 +22,7 @@ import (
 	"github.com/pgray64/tinypress/authentication"
 	"github.com/pgray64/tinypress/conf"
 	"github.com/pgray64/tinypress/database"
+	"github.com/pgray64/tinypress/route/account"
 	"github.com/pgray64/tinypress/route/entrance"
 	"net/http"
 	"strings"
@@ -79,12 +80,13 @@ func InitRoutes() *echo.Echo {
 	authenticatedRoutes := e.Group("/api/authed/v1/")
 	authenticatedRoutes.Use(authentication.AuthenticatedSessionMiddleware)
 
-	authenticatedRoutes.GET("check-session", func(c echo.Context) error { return echo.ErrNotFound })
+	authenticatedRoutes.GET("check-session", account.CheckSession)
 
 	/********************************************* PUBLIC ROUTES ******************************************************/
 	publicRoutes := e.Group("/api/public/v1/")
 
 	publicRoutes.POST("site-setup", entrance.SiteSetup)
+	publicRoutes.POST("sign-in", entrance.SignIn)
 
 	return e
 }

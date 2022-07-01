@@ -264,7 +264,6 @@ export default function Setup() {
                   type="password"
                   id="password"
                   autoComplete="new-password"
-                  inputProps={{ minLength: 10 }}
                   helperText={errors.password}
                   error={errors.password}
                 />
@@ -348,7 +347,7 @@ export default function Setup() {
             </Button>
           </Box>
         </Box>
-        <Footer sx={{ mt: 5 }} />
+        <Footer sx={{ mt: 8, mb: 5 }} />
       </Container>
     </ThemeProvider>
   );

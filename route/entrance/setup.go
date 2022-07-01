@@ -14,7 +14,6 @@ You should have received a copy of the GNU General Public License along with Tin
 package entrance
 
 import (
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/pgray64/tinypress/conf"
 	"github.com/pgray64/tinypress/service/media"
@@ -97,12 +96,7 @@ func SiteSetup(c echo.Context) error {
 	}
 
 	// Log in the user
-	sess, err := session.Get(conf.SessionKey, c)
-	if err != nil {
-		return echo.ErrInternalServerError
-	}
-	sess.Values[conf.SessionUserIdKey] = newUser.ID
-	err = sess.Save(c.Request(), c.Response())
+	err = user.CreateUserSession(newUser.ID, c)
 	if err != nil {
 		return echo.ErrInternalServerError
 	}

@@ -10,6 +10,13 @@ Tinypress is distributed in the hope that it will be useful, but WITHOUT ANY WAR
 You should have received a copy of the GNU General Public License along with Tinypress. If not, see <https://www.gnu.org/licenses/>.
 */
 
-export default function SignIn() {
-  return <div>TODO</div>;
+import api from "../api";
+
+const baseUrl = "/api/public/v1/";
+
+export function signIn({ username, password }) {
+  return api.post(baseUrl + "sign-in", {
+    username,
+    password,
+  });
 }

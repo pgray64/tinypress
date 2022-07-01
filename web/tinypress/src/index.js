@@ -17,7 +17,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthRouteOutlet } from "./partials/global/authRouteOutlet";
 import Setup from "./pages/entrance/setup";
 import DashboardHome from "./pages/account/dashboard";
-import SignIn from "./services/api/entrance/signIn";
+import SignIn from "./pages/entrance/signIn";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

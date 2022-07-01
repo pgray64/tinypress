@@ -17,13 +17,17 @@ import (
 	"errors"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
+	"github.com/labstack/echo-contrib/session"
+	"github.com/labstack/echo/v4"
+	"github.com/pgray64/tinypress/conf"
 	"github.com/pgray64/tinypress/database"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"time"
 )
 
 type User struct {
-	ID           int64     `gorm:"primaryKey;autoIncrement"`
+	ID           int       `gorm:"primaryKey;autoIncrement"`
 	DisplayName  string    `gorm:"not null;size:100"`
 	Email        string    `gorm:"uniqueIndex:idx_users_email,where:deleted_at is null;not null;size:255"`
 	Username     string    `gorm:"uniqueIndex:idx_users_username,where:deleted_at is null;not null;size:100"`
@@ -41,4 +45,34 @@ func (user User) Create() (isDup bool, err error) {
 		return isDup, nil
 	}
 	return false, insertRes.Error
+}
+
+// CheckCredentials returns the user if credentials are valid
+func CheckCredentials(username string, password string) (*User, error) {
+	var user User
+	selectRes := database.Database.Where(User{Username: username}).First(&user)
+
+	if selectRes.Error != nil {
+		if errors.Is(selectRes.Error, gorm.ErrRecordNotFound) {
+			// Don't allow enumeration of existing users
+			return nil, nil
+		} else {
+			return nil, selectRes.Error
+		}
+	}
+	if bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)) != nil {
+		// Password didn't match - abort
+		return nil, nil
+	}
+
+	return &user, nil
+}
+func CreateUserSession(userId int, c echo.Context) error {
+	sess, err := session.Get(conf.SessionKey, c)
+	if err != nil {
+		return err
+	}
+	sess.Values[conf.SessionUserIdKey] = userId
+	err = sess.Save(c.Request(), c.Response())
+	return err
 }
