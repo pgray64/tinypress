@@ -37,7 +37,7 @@ type User struct {
 	DeletedAt    gorm.DeletedAt
 }
 
-func (user User) Create() (isDup bool, err error) {
+func (user *User) Create() (isDup bool, err error) {
 	insertRes := database.Database.Create(&user)
 	var pgErr *pgconn.PgError
 

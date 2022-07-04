@@ -28,7 +28,7 @@ type Settings struct {
 	ImageDirectoryPath string `gorm:"not null;size:255"`
 }
 
-func (settings Settings) Create() error {
+func (settings *Settings) Create() error {
 	if !settings.Active {
 		return errors.New("inserting an inactive setting entry is now allowed")
 	}
