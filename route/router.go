@@ -80,7 +80,8 @@ func InitRoutes() *echo.Echo {
 	authenticatedRoutes := e.Group("/api/authed/v1/")
 	authenticatedRoutes.Use(authentication.AuthenticatedSessionMiddleware)
 
-	authenticatedRoutes.GET("check-session", account.CheckSession)
+	authenticatedRoutes.GET("account/check-session", account.CheckSession)
+	authenticatedRoutes.POST("account/sign-out", account.SignOut)
 
 	/********************************************* PUBLIC ROUTES ******************************************************/
 	publicRoutes := e.Group("/api/public/v1/")

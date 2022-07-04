@@ -10,13 +10,9 @@ Tinypress is distributed in the hope that it will be useful, but WITHOUT ANY WAR
 You should have received a copy of the GNU General Public License along with Tinypress. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import api from "../api";
-
-const baseUrl = "/api/authed/v1/account/";
-
-export function session() {
-  return api.get(baseUrl + "check-session", {});
-}
-export function signOut() {
-  return api.post(baseUrl + "sign-out", {});
-}
+const ProductFeatures = Object.freeze({
+  ManageUsers: 0,
+  ManageSettings: 1,
+  AddEditContent: 2,
+});
+export default ProductFeatures;

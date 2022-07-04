@@ -14,8 +14,10 @@ You should have received a copy of the GNU General Public License along with Tin
 package account
 
 import (
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/pgray64/tinypress/authentication"
+	"github.com/pgray64/tinypress/conf"
 	"net/http"
 )
 
@@ -28,4 +30,17 @@ func CheckSession(c echo.Context) error {
 	return c.JSON(http.StatusOK, checkSessionResult{
 		UserId: authContext.UserId,
 	})
+}
+
+func SignOut(c echo.Context) error {
+	sess, err := session.Get(conf.SessionKey, c)
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+	sess.Options.MaxAge = -1
+	err = sess.Save(c.Request(), c.Response())
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+	return c.JSON(http.StatusOK, new(struct{}))
 }

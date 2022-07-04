@@ -10,6 +10,13 @@ Tinypress is distributed in the hope that it will be useful, but WITHOUT ANY WAR
 You should have received a copy of the GNU General Public License along with Tinypress. If not, see <https://www.gnu.org/licenses/>.
 */
 
-export default function DashboardHome() {
-  return <div>TODO</div>;
+import iconImage from "../../icon.svg";
+import Link from "@mui/material/Link";
+import { Link as RouterLink } from "react-router-dom";
+export default function TinypressIcon({ height }) {
+  return (
+    <Link to="/dashboard" component={RouterLink} sx={{ display: "flex" }}>
+      <img src={iconImage} height={height} alt="Tinypress" />
+    </Link>
+  );
 }
