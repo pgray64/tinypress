@@ -16,6 +16,7 @@ package entrance
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/pgray64/tinypress/conf"
+	"github.com/pgray64/tinypress/enum/userrole"
 	"github.com/pgray64/tinypress/service/media"
 	"github.com/pgray64/tinypress/service/settings"
 	"github.com/pgray64/tinypress/service/user"
@@ -81,10 +82,13 @@ func SiteSetup(c echo.Context) error {
 		Username:     strings.ToLower(strings.TrimSpace(formData.Username)),
 		PasswordHash: string(hashedPassword),
 	}
+	// Create settings for new site
 	err = newSettings.Create()
 	if err != nil {
 		return echo.ErrInternalServerError
 	}
+
+	// Create the first user
 	isDup, err := newUser.Create()
 	if err != nil {
 		return echo.ErrInternalServerError
@@ -93,6 +97,14 @@ func SiteSetup(c echo.Context) error {
 	if isDup {
 		// No way for this to happen unless installing over old install or someone ran manual SQL
 		return echo.NewHTTPError(http.StatusBadRequest, "Username is already in use")
+	}
+
+	// First user for new customer gets all roles
+	err = user.CreateOrUpdateRoleMappings(newUser.ID, []userrole.UserRole{
+		userrole.Admin, userrole.Editor, userrole.User,
+	})
+	if err != nil {
+		return echo.ErrInternalServerError
 	}
 
 	// Log in the user

@@ -1,5 +1,5 @@
 /*
-Package main is for the entrypoint of the Tinypress application
+Package userrole is for the user role enum
 
 Copyright 2022 Philippe Gray
 
@@ -11,18 +11,12 @@ Tinypress is distributed in the hope that it will be useful, but WITHOUT ANY WAR
 
 You should have received a copy of the GNU General Public License along with Tinypress. If not, see <https://www.gnu.org/licenses/>.
 */
-package main
+package userrole
 
-import (
-	"github.com/pgray64/tinypress/database"
-	"github.com/pgray64/tinypress/service/settings"
-	"github.com/pgray64/tinypress/service/user"
+type UserRole int
+
+const (
+	Admin UserRole = iota
+	Editor
+	User
 )
-
-func migrateDatabase() error {
-	return database.Database.AutoMigrate(
-		&settings.Settings{},
-		&user.User{},
-		&user.RoleMapping{},
-	)
-}
