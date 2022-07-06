@@ -24,6 +24,7 @@ type RoleMapping struct {
 	ID       int               `gorm:"primaryKey;autoIncrement"`
 	UserRole userrole.UserRole `gorm:"not null;uniqueIndex:idx_role_mappings_user_id_user_role"`
 	UserID   int               `gorm:"not null;uniqueIndex:idx_role_mappings_user_id_user_role"`
+	User     User              `gorm:"PRELOAD:false"`
 }
 
 func GetFeaturesForRole(role userrole.UserRole) []productfeature.ProductFeature {
@@ -43,7 +44,36 @@ func GetFeaturesForRole(role userrole.UserRole) []productfeature.ProductFeature 
 		return []productfeature.ProductFeature{}
 	}
 }
-
+func IsRemovingLastAdmin(userID int, updatedRoles []userrole.UserRole) (bool, error) {
+	var adminRoleMappings []RoleMapping
+	userIsAdmin := false
+	selectRes := database.Database.Model(&RoleMapping{}).Joins("inner join users on users.id = role_mappings.user_id and users.deleted_at is null").
+		Where(&RoleMapping{UserRole: userrole.Admin}).
+		Find(&adminRoleMappings)
+	if selectRes.Error != nil {
+		return false, selectRes.Error
+	}
+	for _, mapping := range adminRoleMappings {
+		if mapping.UserID == userID {
+			userIsAdmin = true
+		}
+	}
+	if len(adminRoleMappings) >= 2 {
+		return false, nil
+	}
+	if userIsAdmin {
+		// Since we are modifying last admin, ensure we are not removing admin role
+		for _, role := range updatedRoles {
+			if role == userrole.Admin {
+				return false, nil
+			}
+		}
+		return true, nil
+	} else {
+		// We are not touching the last admin so we are good
+		return false, nil
+	}
+}
 func CreateOrUpdateRoleMappings(userID int, roles []userrole.UserRole) error {
 	txErr := database.Database.Transaction(func(tx *gorm.DB) error {
 		var currentRoles []RoleMapping

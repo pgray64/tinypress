@@ -168,7 +168,7 @@ func DeleteUser(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 	if request.ID == authContext.UserId {
-		return echo.NewHTTPError(http.StatusInternalServerError, "You can't delete the user you are logged in as.")
+		return echo.NewHTTPError(http.StatusForbidden, "You can't delete the user you are logged in as.")
 	}
 	deleteRes := database.Database.Where(&user.User{ID: request.ID}).Delete(&user.User{})
 	if deleteRes.Error != nil {
@@ -203,7 +203,15 @@ func UpdateUser(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 	// Set roles
-	err := user.CreateOrUpdateRoleMappings(formData.ID, formData.SelectedRoles)
+	// Ensure we have at least one admin
+	isRemovingLastAdmin, err := user.IsRemovingLastAdmin(formData.ID, formData.SelectedRoles)
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+	if isRemovingLastAdmin {
+		return echo.NewHTTPError(http.StatusForbidden, "You need at least one user with the admin role.")
+	}
+	err = user.CreateOrUpdateRoleMappings(formData.ID, formData.SelectedRoles)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "An error occurred saving user roles.")
 	}

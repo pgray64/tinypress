@@ -16,7 +16,7 @@ package userrole
 type UserRole int
 
 const (
-	Admin UserRole = iota
+	Admin UserRole = iota + 1
 	Editor
 	User
 )

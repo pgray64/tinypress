@@ -16,7 +16,7 @@ package productfeature
 type ProductFeature int
 
 const (
-	ManageUsers ProductFeature = iota
+	ManageUsers ProductFeature = iota + 1
 	ManageSettings
 	AddEditContent
 )

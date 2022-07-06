@@ -11,9 +11,9 @@ You should have received a copy of the GNU General Public License along with Tin
 */
 
 const UserRoles = Object.freeze({
-  Admin: 0,
-  Editor: 1,
-  User: 2,
+  Admin: 1,
+  Editor: 2,
+  User: 3,
   getDescription(role) {
     switch (role) {
       case UserRoles.Admin:

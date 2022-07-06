@@ -11,8 +11,8 @@ You should have received a copy of the GNU General Public License along with Tin
 */
 
 const ProductFeatures = Object.freeze({
-  ManageUsers: 0,
-  ManageSettings: 1,
-  AddEditContent: 2,
+  ManageUsers: 1,
+  ManageSettings: 2,
+  AddEditContent: 3,
 });
 export default ProductFeatures;
