@@ -1,6 +1,4 @@
 /*
-Package authentication is for authentication of users in Tinypress
-
 Copyright 2022 Philippe Gray
 
 This file is part of Tinypress.
@@ -11,15 +9,20 @@ Tinypress is distributed in the hope that it will be useful, but WITHOUT ANY WAR
 
 You should have received a copy of the GNU General Public License along with Tinypress. If not, see <https://www.gnu.org/licenses/>.
 */
-package authentication
 
-import (
-	"github.com/labstack/echo/v4"
-	"github.com/pgray64/tinypress/enum/productfeature"
-)
+import { Chip, Stack } from "@mui/material";
+import UserRoles from "../../enums/userRoles/userRoles";
 
-type AuthContext struct {
-	echo.Context
-	UserId          int
-	AllowedFeatures []productfeature.ProductFeature
+export default function UserRoleChips({ roles }) {
+  return (
+    <Stack spacing={1} direction={{ xs: "column", sm: "row" }}>
+      {(roles ?? []).map((role) => {
+        return (
+          <span>
+            <Chip label={UserRoles.getDescription(role)} size="small" />
+          </span>
+        );
+      })}
+    </Stack>
+  );
 }

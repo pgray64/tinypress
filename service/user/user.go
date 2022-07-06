@@ -29,12 +29,13 @@ import (
 type User struct {
 	ID           int       `gorm:"primaryKey;autoIncrement"`
 	DisplayName  string    `gorm:"not null;size:100"`
-	Email        string    `gorm:"uniqueIndex:idx_users_email,where:deleted_at is null;not null;size:255"`
+	Email        string    `gorm:"not null;size:255"`
 	Username     string    `gorm:"uniqueIndex:idx_users_username,where:deleted_at is null;not null;size:100"`
 	PasswordHash string    `gorm:"not null"`
 	CreatedAt    time.Time `gorm:"autoCreateTime"`
 	UpdatedAt    time.Time `gorm:"autoUpdateTime"`
 	DeletedAt    gorm.DeletedAt
+	RoleMappings []RoleMapping
 }
 
 func (user *User) Create() (isDup bool, err error) {
@@ -42,9 +43,44 @@ func (user *User) Create() (isDup bool, err error) {
 	var pgErr *pgconn.PgError
 
 	if insertRes.Error != nil && errors.As(insertRes.Error, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
-		return isDup, nil
+		return true, nil
 	}
 	return false, insertRes.Error
+}
+
+func ListUsersWithRoles(page int, perPage int) (users []User, totalCount int64, err error) {
+	countRes := database.Database.Find(&User{}).Count(&totalCount)
+	if countRes.Error != nil {
+		return users, totalCount, countRes.Error
+	}
+
+	offset := perPage * page
+	selectRes := database.Database.
+		Model(&User{}).
+		Preload("RoleMappings").
+		Order("id desc").
+		Offset(offset).
+		Limit(perPage).
+		Find(&users)
+
+	return users, totalCount, selectRes.Error
+}
+
+func GetUserWithRoles(userId int) (*User, error) {
+	var users []User
+	selectRes := database.Database.
+		Where(&User{ID: userId}).
+		Preload("RoleMappings").
+		Order("id desc").
+		Limit(1).
+		Find(&users)
+	if selectRes.Error != nil {
+		return nil, selectRes.Error
+	}
+	if len(users) < 1 {
+		return nil, nil
+	}
+	return &users[0], nil
 }
 
 // CheckCredentials returns the user if credentials are valid

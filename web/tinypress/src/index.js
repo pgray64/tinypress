@@ -18,6 +18,9 @@ import { AuthRouteOutlet } from "./partials/global/authRouteOutlet";
 import Setup from "./pages/entrance/setup";
 import DashboardHome from "./pages/account/dashboardHome";
 import SignIn from "./pages/entrance/signIn";
+import ManageUsers from "./pages/admin/manageUsers";
+import AddUser from "./pages/admin/addUser";
+import EditUser from "./pages/admin/editUser";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -31,6 +34,10 @@ root.render(
         {/* Authenticated routes here */}
         <Route element={<AuthRouteOutlet />}>
           <Route path="dashboard" element={<DashboardHome />} />
+          {/* Admin routes */}
+          <Route path="admin/manage-users" element={<ManageUsers />} />
+          <Route path="admin/manage-users/add" element={<AddUser />} />
+          <Route path="admin/manage-users/edit/:id" element={<EditUser />} />
         </Route>
 
         {/* Catch-all to redirect to home */}

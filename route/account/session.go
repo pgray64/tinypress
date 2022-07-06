@@ -18,17 +18,20 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/pgray64/tinypress/authentication"
 	"github.com/pgray64/tinypress/conf"
+	"github.com/pgray64/tinypress/enum/productfeature"
 	"net/http"
 )
 
 type checkSessionResult struct {
-	UserId int `json:"userId"`
+	UserId          int                             `json:"userId"`
+	AllowedFeatures []productfeature.ProductFeature `json:"allowedFeatures"`
 }
 
 func CheckSession(c echo.Context) error {
 	authContext := c.(*authentication.AuthContext)
 	return c.JSON(http.StatusOK, checkSessionResult{
-		UserId: authContext.UserId,
+		UserId:          authContext.UserId,
+		AllowedFeatures: authContext.AllowedFeatures,
 	})
 }
 

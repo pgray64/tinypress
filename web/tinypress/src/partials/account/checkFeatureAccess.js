@@ -1,6 +1,4 @@
 /*
-Package authentication is for authentication of users in Tinypress
-
 Copyright 2022 Philippe Gray
 
 This file is part of Tinypress.
@@ -11,15 +9,17 @@ Tinypress is distributed in the hope that it will be useful, but WITHOUT ANY WAR
 
 You should have received a copy of the GNU General Public License along with Tinypress. If not, see <https://www.gnu.org/licenses/>.
 */
-package authentication
 
-import (
-	"github.com/labstack/echo/v4"
-	"github.com/pgray64/tinypress/enum/productfeature"
-)
+import * as React from "react";
+import AuthContext from "../../contexts/authContext";
+import { useNavigate } from "react-router-dom";
 
-type AuthContext struct {
-	echo.Context
-	UserId          int
-	AllowedFeatures []productfeature.ProductFeature
+export default function CheckFeatureAccess({ feature }) {
+  const authContext = React.useContext(AuthContext);
+  const navigate = useNavigate();
+  React.useEffect(() => {
+    if (!authContext.canAccessFeature(feature)) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, []);
 }

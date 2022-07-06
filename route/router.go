@@ -22,7 +22,9 @@ import (
 	"github.com/pgray64/tinypress/authentication"
 	"github.com/pgray64/tinypress/conf"
 	"github.com/pgray64/tinypress/database"
+	"github.com/pgray64/tinypress/enum/productfeature"
 	"github.com/pgray64/tinypress/route/account"
+	"github.com/pgray64/tinypress/route/admin"
 	"github.com/pgray64/tinypress/route/entrance"
 	"net/http"
 	"strings"
@@ -82,6 +84,13 @@ func InitRoutes() *echo.Echo {
 
 	authenticatedRoutes.GET("account/check-session", account.CheckSession)
 	authenticatedRoutes.POST("account/sign-out", account.SignOut)
+
+	/***** ADMIN ROUTES *****/
+	authenticatedRoutes.POST("admin/users/add-user", admin.AddUser, authentication.RequireProductFeatureMiddleware(productfeature.ManageUsers))
+	authenticatedRoutes.POST("admin/users/list-users", admin.ListUsers, authentication.RequireProductFeatureMiddleware(productfeature.ManageUsers))
+	authenticatedRoutes.POST("admin/users/get-user", admin.GetUser, authentication.RequireProductFeatureMiddleware(productfeature.ManageUsers))
+	authenticatedRoutes.POST("admin/users/delete-user", admin.DeleteUser, authentication.RequireProductFeatureMiddleware(productfeature.ManageUsers))
+	authenticatedRoutes.POST("admin/users/update-user", admin.UpdateUser, authentication.RequireProductFeatureMiddleware(productfeature.ManageUsers))
 
 	/********************************************* PUBLIC ROUTES ******************************************************/
 	publicRoutes := e.Group("/api/public/v1/")

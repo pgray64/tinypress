@@ -1,6 +1,4 @@
 /*
-Package authentication is for authentication of users in Tinypress
-
 Copyright 2022 Philippe Gray
 
 This file is part of Tinypress.
@@ -11,15 +9,22 @@ Tinypress is distributed in the hope that it will be useful, but WITHOUT ANY WAR
 
 You should have received a copy of the GNU General Public License along with Tinypress. If not, see <https://www.gnu.org/licenses/>.
 */
-package authentication
 
-import (
-	"github.com/labstack/echo/v4"
-	"github.com/pgray64/tinypress/enum/productfeature"
-)
-
-type AuthContext struct {
-	echo.Context
-	UserId          int
-	AllowedFeatures []productfeature.ProductFeature
-}
+const UserRoles = Object.freeze({
+  Admin: 0,
+  Editor: 1,
+  User: 2,
+  getDescription(role) {
+    switch (role) {
+      case UserRoles.Admin:
+        return "Admin";
+      case UserRoles.Editor:
+        return "Editor";
+      case UserRoles.User:
+        return "User";
+      default:
+        throw new Error("Invalid role");
+    }
+  },
+});
+export default UserRoles;

@@ -17,6 +17,9 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/pgray64/tinypress/conf"
+	"github.com/pgray64/tinypress/database"
+	"github.com/pgray64/tinypress/enum/productfeature"
+	"github.com/pgray64/tinypress/service/user"
 )
 
 func AuthenticatedSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
@@ -37,12 +40,24 @@ func AuthenticatedSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.ErrUnauthorized
 		}
 
-		// TODO Load user from DB
+		// Load user from DB
+		var currentUser user.User
+
+		selectRes := database.Database.Where(&user.User{ID: userId}).First(&currentUser)
+
+		if selectRes.Error != nil {
+			// AllTenantsDB issue or session exists for user that no longer exists
+			sess.Options.MaxAge = -1
+			sess.Save(c.Request(), c.Response())
+			return echo.ErrInternalServerError
+		}
 
 		// Any authed route can grab the current user now
 		authContext := &AuthContext{Context: c, UserId: userId}
 
-		// TODO Load roles or access level into session
+		// Populate features user has access to
+		allowedFeatures, err := user.GetFeaturesForUser(currentUser.ID)
+		authContext.AllowedFeatures = allowedFeatures
 
 		// Save updates cookie expiration to now + cookie duration
 		err = sess.Save(c.Request(), c.Response())
@@ -50,5 +65,24 @@ func AuthenticatedSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.ErrInternalServerError
 		}
 		return next(authContext)
+	}
+}
+
+func RequireProductFeatureMiddleware(feature productfeature.ProductFeature) func(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			authContext := c.(*AuthContext)
+			allowedFeatures, err := user.GetFeaturesForUser(authContext.UserId)
+			if err != nil {
+				return echo.ErrInternalServerError
+			}
+			for _, allowedFeature := range allowedFeatures {
+				if feature == allowedFeature {
+					return next(authContext)
+				}
+			}
+			return echo.ErrForbidden
+		}
+
 	}
 }
