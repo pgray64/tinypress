@@ -129,13 +129,16 @@ func ListUsers(c echo.Context) error {
 }
 
 type getUserRequest struct {
-	ID int `json:"id"`
+	ID int `json:"id" validate:"required,min=1"`
 }
 
 func GetUser(c echo.Context) error {
 	request := new(getUserRequest)
 	if err := c.Bind(request); err != nil {
 		return echo.ErrInternalServerError
+	}
+	if err := c.Validate(request); err != nil {
+		return echo.ErrBadRequest
 	}
 
 	rawUser, err := user.GetUserWithRoles(request.ID)
@@ -158,7 +161,7 @@ func GetUser(c echo.Context) error {
 }
 
 type deleteUserRequest struct {
-	ID int `json:"id"`
+	ID int `json:"id" validate:"required,min=1"`
 }
 
 func DeleteUser(c echo.Context) error {
@@ -167,9 +170,14 @@ func DeleteUser(c echo.Context) error {
 	if err := c.Bind(request); err != nil {
 		return echo.ErrInternalServerError
 	}
+	if err := c.Validate(request); err != nil {
+		return echo.ErrBadRequest
+	}
+
 	if request.ID == authContext.UserId {
 		return echo.NewHTTPError(http.StatusForbidden, "You can't delete the user you are logged in as.")
 	}
+
 	deleteRes := database.Database.Where(&user.User{ID: request.ID}).Delete(&user.User{})
 	if deleteRes.Error != nil {
 		return echo.ErrInternalServerError
@@ -178,7 +186,7 @@ func DeleteUser(c echo.Context) error {
 }
 
 type updateUserForm struct {
-	ID            int                 `json:"id" validate:"required"`
+	ID            int                 `json:"id" validate:"required,min=1"`
 	DisplayName   string              `json:"displayName" validate:"required,max=100"`
 	Email         string              `json:"email" validate:"required,email,max=255"`
 	Username      string              `json:"username" validate:"required,alphanum,max=100"`
@@ -193,6 +201,7 @@ func UpdateUser(c echo.Context) error {
 	if err := c.Validate(formData); err != nil {
 		return echo.ErrBadRequest
 	}
+
 	updateRes := database.Database.Where(&user.User{ID: formData.ID}).
 		Updates(&user.User{DisplayName: formData.DisplayName, Username: formData.Username, Email: formData.Email})
 	var pgErr *pgconn.PgError

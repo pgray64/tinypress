@@ -14,6 +14,7 @@ You should have received a copy of the GNU General Public License along with Tin
 package user
 
 import (
+	"errors"
 	"github.com/pgray64/tinypress/database"
 	"github.com/pgray64/tinypress/enum/productfeature"
 	"github.com/pgray64/tinypress/enum/userrole"
@@ -45,6 +46,9 @@ func GetFeaturesForRole(role userrole.UserRole) []productfeature.ProductFeature 
 	}
 }
 func IsRemovingLastAdmin(userID int, updatedRoles []userrole.UserRole) (bool, error) {
+	if userID < 1 {
+		return false, errors.New("invalid user")
+	}
 	var adminRoleMappings []RoleMapping
 	userIsAdmin := false
 	selectRes := database.Database.Model(&RoleMapping{}).Joins("inner join users on users.id = role_mappings.user_id and users.deleted_at is null").
@@ -75,6 +79,9 @@ func IsRemovingLastAdmin(userID int, updatedRoles []userrole.UserRole) (bool, er
 	}
 }
 func CreateOrUpdateRoleMappings(userID int, roles []userrole.UserRole) error {
+	if userID < 1 {
+		return errors.New("invalid user")
+	}
 	txErr := database.Database.Transaction(func(tx *gorm.DB) error {
 		var currentRoles []RoleMapping
 		currentRoleMap := make(map[userrole.UserRole]bool)
