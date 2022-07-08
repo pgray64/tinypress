@@ -178,7 +178,7 @@ func DeleteUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, "You can't delete the user you are logged in as.")
 	}
 
-	deleteRes := database.Database.Where(&user.User{ID: request.ID}).Delete(&user.User{})
+	deleteRes := database.Database.Where(map[string]interface{}{"id": request.ID}).Delete(&user.User{})
 	if deleteRes.Error != nil {
 		return echo.ErrInternalServerError
 	}
@@ -202,7 +202,7 @@ func UpdateUser(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	updateRes := database.Database.Where(&user.User{ID: formData.ID}).
+	updateRes := database.Database.Where(map[string]interface{}{"id": formData.ID}).
 		Updates(&user.User{DisplayName: formData.DisplayName, Username: formData.Username, Email: formData.Email})
 	var pgErr *pgconn.PgError
 	if updateRes.Error != nil {

@@ -69,7 +69,7 @@ func ListUsersWithRoles(page int, perPage int) (users []User, totalCount int64, 
 func GetUserWithRoles(userId int) (*User, error) {
 	var users []User
 	selectRes := database.Database.
-		Where(&User{ID: userId}).
+		Where(map[string]interface{}{"id": userId}).
 		Preload("RoleMappings").
 		Order("id desc").
 		Limit(1).
@@ -86,7 +86,7 @@ func GetUserWithRoles(userId int) (*User, error) {
 // CheckCredentials returns the user if credentials are valid
 func CheckCredentials(username string, password string) (*User, error) {
 	var user User
-	selectRes := database.Database.Where(User{Username: username}).First(&user)
+	selectRes := database.Database.Where(map[string]interface{}{"username": username}).First(&user)
 
 	if selectRes.Error != nil {
 		if errors.Is(selectRes.Error, gorm.ErrRecordNotFound) {

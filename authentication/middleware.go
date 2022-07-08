@@ -43,7 +43,7 @@ func AuthenticatedSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		// Load user from DB
 		var currentUser user.User
 
-		selectRes := database.Database.Where(&user.User{ID: userId}).First(&currentUser)
+		selectRes := database.Database.Where(map[string]interface{}{"id": userId}).First(&currentUser)
 
 		if selectRes.Error != nil {
 			// AllTenantsDB issue or session exists for user that no longer exists

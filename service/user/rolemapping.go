@@ -52,7 +52,7 @@ func IsRemovingLastAdmin(userID int, updatedRoles []userrole.UserRole) (bool, er
 	var adminRoleMappings []RoleMapping
 	userIsAdmin := false
 	selectRes := database.Database.Model(&RoleMapping{}).Joins("inner join users on users.id = role_mappings.user_id and users.deleted_at is null").
-		Where(&RoleMapping{UserRole: userrole.Admin}).
+		Where(map[string]interface{}{"user_role": userrole.Admin}).
 		Find(&adminRoleMappings)
 	if selectRes.Error != nil {
 		return false, selectRes.Error
@@ -87,7 +87,7 @@ func CreateOrUpdateRoleMappings(userID int, roles []userrole.UserRole) error {
 		currentRoleMap := make(map[userrole.UserRole]bool)
 
 		// Find existing roles for user
-		if res := tx.Where(&RoleMapping{UserID: userID}).
+		if res := tx.Where(map[string]interface{}{"user_id": userID}).
 			Find(&currentRoles); res.Error != nil {
 			return res.Error
 		}
@@ -95,7 +95,7 @@ func CreateOrUpdateRoleMappings(userID int, roles []userrole.UserRole) error {
 			currentRoleMap[role.UserRole] = true
 		}
 		// Delete roles no longer selected for user
-		if res := tx.Where(&RoleMapping{UserID: userID}).
+		if res := tx.Where(map[string]interface{}{"user_id": userID}).
 			Not(map[string]interface{}{"user_role": roles}).
 			Delete(&RoleMapping{}); res.Error != nil {
 			return res.Error
@@ -123,7 +123,7 @@ func CreateOrUpdateRoleMappings(userID int, roles []userrole.UserRole) error {
 
 func GetFeaturesForUser(userID int) ([]productfeature.ProductFeature, error) {
 	var mappings []RoleMapping
-	mappingsRes := database.Database.Where(&RoleMapping{UserID: userID}).
+	mappingsRes := database.Database.Where(map[string]interface{}{"user_id": userID}).
 		Find(&mappings)
 	if mappingsRes.Error != nil {
 		return []productfeature.ProductFeature{}, mappingsRes.Error
