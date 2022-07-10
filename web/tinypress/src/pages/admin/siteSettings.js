@@ -278,7 +278,7 @@ export default function SiteSettings() {
               </Grid>
               <Grid item xs={12}>
                 <TextField
-                  type="text"
+                  type="password"
                   required
                   fullWidth
                   id="smtpPassword"
