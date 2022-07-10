@@ -21,6 +21,7 @@ import SignIn from "./pages/entrance/signIn";
 import ManageUsers from "./pages/admin/manageUsers";
 import AddUser from "./pages/admin/addUser";
 import EditUser from "./pages/admin/editUser";
+import SiteSettings from "./pages/admin/siteSettings";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -38,6 +39,7 @@ root.render(
           <Route path="admin/manage-users" element={<ManageUsers />} />
           <Route path="admin/manage-users/add" element={<AddUser />} />
           <Route path="admin/manage-users/edit/:id" element={<EditUser />} />
+          <Route path="admin/site-settings" element={<SiteSettings />} />
         </Route>
 
         {/* Catch-all to redirect to home */}

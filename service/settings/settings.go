@@ -41,3 +41,27 @@ func SiteExists() (bool, error) {
 	countRes := database.Database.Model(&Settings{}).Count(&count)
 	return count > 0, countRes.Error
 }
+
+func GetSettings() (*Settings, error) {
+	var settings Settings
+	selectRes := database.Database.Where(map[string]interface{}{"active": true}).First(&settings)
+	if selectRes.Error != nil {
+		return nil, selectRes.Error
+	}
+	return &settings, nil
+}
+
+func UpdateSettings(settings *Settings) error {
+	if !settings.Active {
+		return errors.New("inserting an inactive setting entry is now allowed")
+	}
+	insertRes := database.Database.Where(map[string]interface{}{"active": true}).Updates(&Settings{
+		SiteName:           settings.SiteName,
+		SmtpServer:         settings.SmtpServer,
+		SmtpUsername:       settings.SmtpUsername,
+		SmtpPassword:       settings.SmtpPassword,
+		SmtpPort:           settings.SmtpPort,
+		ImageDirectoryPath: settings.ImageDirectoryPath,
+	})
+	return insertRes.Error
+}

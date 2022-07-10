@@ -92,6 +92,9 @@ func InitRoutes() *echo.Echo {
 	authenticatedRoutes.POST("admin/users/delete-user", admin.DeleteUser, authentication.RequireProductFeatureMiddleware(productfeature.ManageUsers))
 	authenticatedRoutes.POST("admin/users/update-user", admin.UpdateUser, authentication.RequireProductFeatureMiddleware(productfeature.ManageUsers))
 
+	authenticatedRoutes.GET("admin/site-settings/list", admin.GetSiteSettings, authentication.RequireProductFeatureMiddleware(productfeature.ManageSettings))
+	authenticatedRoutes.POST("admin/site-settings/update", admin.UpdateSiteSettings, authentication.RequireProductFeatureMiddleware(productfeature.ManageSettings))
+
 	/********************************************* PUBLIC ROUTES ******************************************************/
 	publicRoutes := e.Group("/api/public/v1/")
 

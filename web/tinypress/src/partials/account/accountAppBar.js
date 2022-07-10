@@ -58,7 +58,7 @@ export default function AccountAppBar() {
   };
   const gotoSettings = () => {
     setAnchorEl(null);
-    navigate("/admin/settings", { replace: false });
+    navigate("/admin/site-settings", { replace: false });
   };
   const gotoManageUsers = () => {
     setAnchorEl(null);

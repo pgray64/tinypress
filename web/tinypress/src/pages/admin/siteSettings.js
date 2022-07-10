@@ -11,29 +11,36 @@ You should have received a copy of the GNU General Public License along with Tin
 */
 
 import * as React from "react";
-import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { setup } from "../../services/api/entrance/setup";
 import CustomSnackbar from "../../partials/global/customSnackbar";
+import AccountAppBar from "../../partials/account/accountAppBar";
+import { CircularProgress, Divider } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import { useNavigate } from "react-router-dom";
-import Footer from "../../partials/global/footer";
-import TinypressLogo from "../../partials/global/tinypressLogo";
+import CheckFeatureAccess from "../../partials/account/checkFeatureAccess";
+import ProductFeatures from "../../enums/productFeatures/productFeatures";
+import TextField from "@mui/material/TextField";
 import { validateFormData } from "../../helpers/validation/validateFormData";
-import { Divider } from "@mui/material";
+import Button from "@mui/material/Button";
+import {
+  getSettings,
+  updateSettings,
+} from "../../services/api/admin/siteSettings";
 
 const theme = createTheme();
 
-export default function Setup() {
-  let navigate = useNavigate();
+export default function SiteSettings() {
   const [serverError, setServerError] = React.useState(null);
+  const [successMessage, setSuccessMessage] = React.useState(null);
   const [submitting, setSubmitting] = React.useState(false);
+  const [settingsData, setSettingsData] = React.useState({});
+  const [loading, setLoading] = React.useState(true);
   const [errors, setErrors] = React.useState({});
+
   const validationRules = {
     siteName: [
       { required: true, message: "Enter a website name" },
@@ -51,36 +58,6 @@ export default function Setup() {
         maxLength: 255,
         message: "Max length is 255",
       },
-    ],
-    displayName: [
-      { required: true, message: "Enter a display name" },
-      {
-        maxLength: 100,
-        message: "Max length is 100",
-      },
-    ],
-    username: [
-      { required: true, message: "Enter a username name" },
-      {
-        pattern: "[a-zA-Z0-9]+",
-        message: "Username can only contain letters and numbers",
-      },
-      {
-        maxLength: 100,
-        message: "Max length is 100",
-      },
-    ],
-    email: [
-      { required: true, message: "Enter an email address" },
-      { email: true, message: "Email address is invalid" },
-      {
-        maxLength: 255,
-        message: "Max length is 255",
-      },
-    ],
-    password: [
-      { required: true, message: "Enter a password" },
-      { minLength: 8, message: "Password should be at least 8 characters" },
     ],
     smtpServer: [
       { required: true, message: "Enter an SMTP server URL" },
@@ -111,8 +88,38 @@ export default function Setup() {
       },
     ],
   };
+
+  const closeErrorSnackbar = () => {
+    setServerError(null);
+  };
+  const closeSuccessSnackbar = () => {
+    setSuccessMessage(null);
+  };
+  const navigate = useNavigate();
+
+  const handleCancel = () => {
+    navigate("/dashboard", { replace: false });
+  };
+
+  React.useEffect(() => {
+    loadSettings();
+  }, []);
+  const loadSettings = () => {
+    getSettings().then(
+      (res) => {
+        setSettingsData(res.data ?? {});
+        setLoading(false);
+      },
+      (err) => {
+        setServerError(err.response?.data?.message ?? "An error occurred.");
+        setLoading(false);
+      }
+    );
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
+
     const data = new FormData(event.currentTarget);
     const validationErrors = validateFormData(data, validationRules);
     setErrors(validationErrors);
@@ -120,20 +127,17 @@ export default function Setup() {
       return;
     }
     setSubmitting(true);
-    setup({
+    updateSettings({
       siteName: data.get("siteName"),
-      displayName: data.get("displayName"),
       imageDirectoryPath: data.get("imageDirectoryPath"),
-      username: data.get("username"),
-      email: data.get("email"),
-      password: data.get("password"),
       smtpServer: data.get("smtpServer"),
       smtpUsername: data.get("smtpUsername"),
       smtpPassword: data.get("smtpPassword"),
       smtpPort: data.get("smtpPort"),
     }).then(
       () => {
-        navigate("/dashboard", { replace: true });
+        setSuccessMessage("Settings updated.");
+        setSubmitting(false);
       },
       (err) => {
         setServerError(err.response?.data?.message ?? "An error occurred.");
@@ -141,46 +145,49 @@ export default function Setup() {
       }
     );
   };
-  const closeSnackbars = () => {
-    setServerError(null);
-  };
 
   return (
     <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <CheckFeatureAccess feature={ProductFeatures.ManageSettings} />
+      <AccountAppBar />
+      <Container component="main" maxWidth="md">
         <CssBaseline />
         <CustomSnackbar
           message={serverError}
           severity="error"
           open={serverError}
-          onClose={closeSnackbars}
+          onClose={closeErrorSnackbar}
         />
-        <Box
-          sx={{
-            marginTop: 8,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <Typography>
-            <TinypressLogo height={30} />
+        <CustomSnackbar
+          message={successMessage}
+          severity="success"
+          open={successMessage}
+          onClose={closeSuccessSnackbar}
+        />
+        <Box sx={{ mt: 3 }}>
+          <Typography component="h2" variant="h5">
+            Website settings
           </Typography>
-
-          <Typography component="h2" variant="h5" sx={{ mt: 3 }}>
-            Your website is almost ready!
-          </Typography>
+        </Box>
+        {loading ? (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "100px",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : (
           <Box
             component="form"
+            noValidate
             onSubmit={handleSubmit}
             sx={{ mt: 3 }}
-            noValidate
           >
-            <Divider sx={{ mb: 2 }}>
-              <Typography variant="caption" color="text.secondary">
-                Settings
-              </Typography>
-            </Divider>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
@@ -193,6 +200,7 @@ export default function Setup() {
                   autoComplete="off"
                   helperText={errors.siteName}
                   error={errors.siteName}
+                  defaultValue={settingsData.siteName}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -208,64 +216,7 @@ export default function Setup() {
                     errors.imageDirectoryPath ?? "e.g. /data/my-image-storage"
                   }
                   error={errors.imageDirectoryPath}
-                />
-              </Grid>
-            </Grid>
-            <Divider sx={{ my: 2 }}>
-              <Typography variant="caption" color="text.secondary">
-                New user
-              </Typography>
-            </Divider>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  autoComplete="off"
-                  name="displayName"
-                  required
-                  fullWidth
-                  id="displayName"
-                  label="Display Name"
-                  autoFocus
-                  helperText={errors.displayName}
-                  error={errors.displayName}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  id="username"
-                  label="Username"
-                  name="username"
-                  autoComplete="off"
-                  helperText={errors.username}
-                  error={errors.username}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  type="email"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  helperText={errors.email}
-                  error={errors.email}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
-                  helperText={errors.password}
-                  error={errors.password}
+                  defaultValue={settingsData.imageDirectoryPath}
                 />
               </Grid>
             </Grid>
@@ -294,6 +245,7 @@ export default function Setup() {
                   autoComplete="off"
                   helperText={errors.smtpServer}
                   error={errors.smtpServer}
+                  defaultValue={settingsData.smtpServer}
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -307,6 +259,7 @@ export default function Setup() {
                   autoComplete="off"
                   helperText={errors.smtpPort}
                   error={errors.smtpPort}
+                  defaultValue={settingsData.smtpPort}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -320,6 +273,7 @@ export default function Setup() {
                   autoComplete="off"
                   helperText={errors.smtpUsername}
                   error={errors.smtpUsername}
+                  defaultValue={settingsData.smtpUsername}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -333,21 +287,34 @@ export default function Setup() {
                   autoComplete="off"
                   helperText={errors.smtpPassword}
                   error={errors.smtpPassword}
+                  defaultValue={settingsData.smtpPassword}
                 />
               </Grid>
             </Grid>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={submitting}
-            >
-              Continue
-            </Button>
+            <Grid container justifyContent="flex-end">
+              <Grid item>
+                <Button
+                  type="button"
+                  variant="outlined"
+                  sx={{ mt: 3, mb: 2, mr: 1 }}
+                  onClick={handleCancel}
+                >
+                  Cancel
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                  disabled={submitting}
+                >
+                  Save changes
+                </Button>
+              </Grid>
+            </Grid>
           </Box>
-        </Box>
-        <Footer sx={{ mt: 8, mb: 5 }} />
+        )}
       </Container>
     </ThemeProvider>
   );
