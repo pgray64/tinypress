@@ -23,14 +23,10 @@ import (
 
 type updateSettingsForm struct {
 	SiteName           string `json:"siteName" validate:"required,max=100"`
-	SmtpServer         string `json:"smtpServer" validate:"required,max=255"`
-	SmtpUsername       string `json:"smtpUsername" validate:"required,max=255"`
-	SmtpPassword       string `json:"smtpPassword" validate:"required,max=255"`
-	SmtpPort           string `json:"smtpPort" validate:"required,max=16"`
 	ImageDirectoryPath string `json:"imageDirectoryPath" validate:"required,max=255"`
 }
 
-func UpdateSiteSettings(c echo.Context) error {
+func UpdateGeneralSiteSettings(c echo.Context) error {
 	formData := new(updateSettingsForm)
 	if err := c.Bind(formData); err != nil {
 		return echo.ErrInternalServerError
@@ -43,10 +39,6 @@ func UpdateSiteSettings(c echo.Context) error {
 		Active:             true,
 		SiteName:           strings.TrimSpace(formData.SiteName),
 		ImageDirectoryPath: strings.TrimRight(formData.ImageDirectoryPath, "/\\"),
-		SmtpServer:         formData.SmtpServer,
-		SmtpUsername:       formData.SmtpUsername,
-		SmtpPassword:       formData.SmtpPassword,
-		SmtpPort:           formData.SmtpPort,
 	}
 
 	// Abort setup if image directory is unwritable
@@ -54,8 +46,7 @@ func UpdateSiteSettings(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Image directory test failed - ensure it exists and allows read and write access")
 	}
 
-	// Create settings for new site
-	err := settings.UpdateSettings(&newSettings)
+	err := settings.UpdateGeneralSettings(&newSettings)
 	if err != nil {
 		return echo.ErrInternalServerError
 	}
@@ -65,25 +56,55 @@ func UpdateSiteSettings(c echo.Context) error {
 
 type siteSettingsResult struct {
 	SiteName           string `json:"siteName"`
+	ImageDirectoryPath string `json:"imageDirectoryPath"`
 	SmtpServer         string `json:"smtpServer"`
 	SmtpUsername       string `json:"smtpUsername"`
-	SmtpPassword       string `json:"smtpPassword"`
 	SmtpPort           string `json:"smtpPort"`
-	ImageDirectoryPath string `json:"imageDirectoryPath"`
 }
 
 func GetSiteSettings(c echo.Context) error {
-	settings, err := settings.GetSettings()
+	siteSettings, err := settings.GetSettings()
 	if err != nil {
 		return echo.ErrInternalServerError
 	}
 	settingsResult := siteSettingsResult{
-		SiteName:           settings.SiteName,
-		SmtpServer:         settings.SmtpServer,
-		SmtpUsername:       settings.SmtpUsername,
-		SmtpPassword:       settings.SmtpPassword,
-		SmtpPort:           settings.SmtpPort,
-		ImageDirectoryPath: settings.ImageDirectoryPath,
+		SiteName:           siteSettings.SiteName,
+		ImageDirectoryPath: siteSettings.ImageDirectoryPath,
+		SmtpServer:         siteSettings.SmtpServer,
+		SmtpUsername:       siteSettings.SmtpUsername,
+		SmtpPort:           siteSettings.SmtpPort,
 	}
 	return c.JSON(http.StatusOK, settingsResult)
+}
+
+type updateSmtpSettingsForm struct {
+	SmtpServer   string `json:"smtpServer" validate:"required,max=255"`
+	SmtpUsername string `json:"smtpUsername" validate:"required,max=255"`
+	SmtpPassword string `json:"smtpPassword" validate:"required,max=255"`
+	SmtpPort     string `json:"smtpPort" validate:"required,max=16"`
+}
+
+func UpdateSmtpSettings(c echo.Context) error {
+	formData := new(updateSmtpSettingsForm)
+	if err := c.Bind(formData); err != nil {
+		return echo.ErrInternalServerError
+	}
+	if err := c.Validate(formData); err != nil {
+		return echo.ErrBadRequest
+	}
+
+	var newSettings = settings.Settings{
+		Active:       true,
+		SmtpServer:   formData.SmtpServer,
+		SmtpUsername: formData.SmtpUsername,
+		SmtpPassword: formData.SmtpPassword,
+		SmtpPort:     formData.SmtpPort,
+	}
+
+	err := settings.UpdateSmtpSettings(&newSettings)
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+
+	return c.JSON(http.StatusOK, new(struct{}))
 }

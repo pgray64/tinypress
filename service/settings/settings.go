@@ -51,17 +51,26 @@ func GetSettings() (*Settings, error) {
 	return &settings, nil
 }
 
-func UpdateSettings(settings *Settings) error {
+func UpdateGeneralSettings(settings *Settings) error {
 	if !settings.Active {
 		return errors.New("inserting an inactive setting entry is now allowed")
 	}
 	insertRes := database.Database.Where(map[string]interface{}{"active": true}).Updates(&Settings{
 		SiteName:           settings.SiteName,
-		SmtpServer:         settings.SmtpServer,
-		SmtpUsername:       settings.SmtpUsername,
-		SmtpPassword:       settings.SmtpPassword,
-		SmtpPort:           settings.SmtpPort,
 		ImageDirectoryPath: settings.ImageDirectoryPath,
+	})
+	return insertRes.Error
+}
+
+func UpdateSmtpSettings(settings *Settings) error {
+	if !settings.Active {
+		return errors.New("inserting an inactive setting entry is now allowed")
+	}
+	insertRes := database.Database.Where(map[string]interface{}{"active": true}).Updates(&Settings{
+		SmtpServer:   settings.SmtpServer,
+		SmtpUsername: settings.SmtpUsername,
+		SmtpPassword: settings.SmtpPassword,
+		SmtpPort:     settings.SmtpPort,
 	})
 	return insertRes.Error
 }

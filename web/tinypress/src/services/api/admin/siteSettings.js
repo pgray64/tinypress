@@ -14,20 +14,22 @@ import api from "../api";
 
 const baseUrl = "/api/authed/v1/admin/site-settings/";
 
-export function getSettings() {
-  return api.get(baseUrl + "list");
+export function getSiteSettings() {
+  return api.get(baseUrl + "get-site-settings");
 }
-export function updateSettings({
-  siteName,
-  imageDirectoryPath,
+export function updateGeneralSettings({ siteName, imageDirectoryPath }) {
+  return api.post(baseUrl + "update-general-settings", {
+    siteName,
+    imageDirectoryPath,
+  });
+}
+export function updateSmtpSettings({
   smtpServer,
   smtpUsername,
   smtpPassword,
   smtpPort,
 }) {
-  return api.post(baseUrl + "update", {
-    siteName,
-    imageDirectoryPath,
+  return api.post(baseUrl + "update-smtp-settings", {
     smtpServer,
     smtpUsername,
     smtpPassword,

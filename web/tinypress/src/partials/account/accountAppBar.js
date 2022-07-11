@@ -79,7 +79,7 @@ export default function AccountAppBar() {
 
       <AppBar
         position="static"
-        color="default"
+        color="transparent"
         elevation={0}
         sx={{
           borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
