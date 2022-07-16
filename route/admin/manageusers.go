@@ -36,8 +36,8 @@ type addUserForm struct {
 	Password      string              `json:"password" validate:"required"`
 	SelectedRoles []userrole.UserRole `json:"selectedRoles" validate:"required"`
 }
-type AddUserResponse struct {
-	UserId int
+type addUserResponse struct {
+	UserId int `json:"userId"`
 }
 
 func AddUser(c echo.Context) error {
@@ -74,10 +74,10 @@ func AddUser(c echo.Context) error {
 	// Set roles
 	err = user.CreateOrUpdateRoleMappings(newUser.ID, formData.SelectedRoles)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "An error occurred saving user roles.")
+		return echo.NewHTTPError(http.StatusBadRequest, "An error occurred saving user roles")
 	}
 
-	return c.JSON(http.StatusOK, AddUserResponse{
+	return c.JSON(http.StatusOK, addUserResponse{
 		UserId: newUser.ID,
 	})
 }
@@ -175,7 +175,7 @@ func DeleteUser(c echo.Context) error {
 	}
 
 	if request.ID == authContext.UserId {
-		return echo.NewHTTPError(http.StatusForbidden, "You can't delete the user you are logged in as.")
+		return echo.NewHTTPError(http.StatusForbidden, "You can't delete the user you are logged in as")
 	}
 
 	deleteRes := database.Database.Where(map[string]interface{}{"id": request.ID}).Delete(&user.User{})
@@ -207,7 +207,7 @@ func UpdateUser(c echo.Context) error {
 	var pgErr *pgconn.PgError
 	if updateRes.Error != nil {
 		if errors.As(updateRes.Error, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Username is already in use.")
+			return echo.NewHTTPError(http.StatusInternalServerError, "Username is already in use")
 		}
 		return echo.ErrInternalServerError
 	}
@@ -218,11 +218,11 @@ func UpdateUser(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 	if isRemovingLastAdmin {
-		return echo.NewHTTPError(http.StatusForbidden, "You need at least one user with the admin role.")
+		return echo.NewHTTPError(http.StatusForbidden, "You need at least one user with the admin role")
 	}
 	err = user.CreateOrUpdateRoleMappings(formData.ID, formData.SelectedRoles)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "An error occurred saving user roles.")
+		return echo.NewHTTPError(http.StatusBadRequest, "An error occurred saving user roles")
 	}
 	return c.JSON(http.StatusOK, new(struct{}))
 }

@@ -15,6 +15,7 @@ package main
 
 import (
 	"github.com/pgray64/tinypress/database"
+	"github.com/pgray64/tinypress/service/page"
 	"github.com/pgray64/tinypress/service/settings"
 	"github.com/pgray64/tinypress/service/user"
 )
@@ -24,5 +25,7 @@ func migrateDatabase() error {
 		&settings.Settings{},
 		&user.User{},
 		&user.RoleMapping{},
+		&page.Page{},
+		&page.ContentRevision{},
 	)
 }

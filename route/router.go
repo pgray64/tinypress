@@ -25,6 +25,7 @@ import (
 	"github.com/pgray64/tinypress/enum/productfeature"
 	"github.com/pgray64/tinypress/route/account"
 	"github.com/pgray64/tinypress/route/admin"
+	"github.com/pgray64/tinypress/route/editor"
 	"github.com/pgray64/tinypress/route/entrance"
 	"net/http"
 	"strings"
@@ -84,6 +85,12 @@ func InitRoutes() *echo.Echo {
 
 	authenticatedRoutes.GET("account/check-session", account.CheckSession)
 	authenticatedRoutes.POST("account/sign-out", account.SignOut)
+
+	/***** EDITOR ROUTES *****/
+	authenticatedRoutes.POST("page-editor/create", editor.CreatePage, authentication.RequireProductFeatureMiddleware(productfeature.AddEditContent))
+	authenticatedRoutes.POST("page-editor/get-page-with-draft", editor.GetPageWithDraft, authentication.RequireProductFeatureMiddleware(productfeature.AddEditContent))
+	authenticatedRoutes.POST("page-editor/save-draft", editor.SaveDraft, authentication.RequireProductFeatureMiddleware(productfeature.AddEditContent))
+	authenticatedRoutes.POST("page-editor/publish-draft", editor.PublishDraft, authentication.RequireProductFeatureMiddleware(productfeature.AddEditContent))
 
 	/***** ADMIN ROUTES *****/
 	authenticatedRoutes.POST("admin/users/add-user", admin.AddUser, authentication.RequireProductFeatureMiddleware(productfeature.ManageUsers))

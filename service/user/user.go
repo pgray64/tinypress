@@ -39,7 +39,7 @@ type User struct {
 }
 
 func (user *User) Create() (isDup bool, err error) {
-	insertRes := database.Database.Create(&user)
+	insertRes := database.Database.Create(user)
 	var pgErr *pgconn.PgError
 
 	if insertRes.Error != nil && errors.As(insertRes.Error, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {

@@ -32,7 +32,7 @@ func (settings *Settings) Create() error {
 	if !settings.Active {
 		return errors.New("inserting an inactive setting entry is now allowed")
 	}
-	insertRes := database.Database.Create(&settings)
+	insertRes := database.Database.Create(settings)
 	return insertRes.Error
 }
 
