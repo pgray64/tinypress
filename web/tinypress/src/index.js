@@ -22,6 +22,7 @@ import ManageUsers from "./pages/admin/manageUsers";
 import AddUser from "./pages/admin/addUser";
 import EditUser from "./pages/admin/editUser";
 import SiteSettings from "./pages/admin/siteSettings";
+import PageEditor from "./pages/managePages/pageEditor";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -34,7 +35,10 @@ root.render(
 
         {/* Authenticated routes here */}
         <Route element={<AuthRouteOutlet />}>
+          {/* Any user routes */}
           <Route path="dashboard" element={<DashboardHome />} />
+          {/* Editor routes */}
+          <Route path="pages/edit/:id" element={<PageEditor />} />
           {/* Admin routes */}
           <Route path="admin/manage-users" element={<ManageUsers />} />
           <Route path="admin/manage-users/add" element={<AddUser />} />

@@ -36,12 +36,20 @@ import AuthContext from "../../contexts/authContext";
 import ProductFeatures from "../../enums/productFeatures/productFeatures";
 import Box from "@mui/material/Box";
 import TinypressIcon from "../global/tinypressIcon";
+import { createPageWithDefaults } from "../../services/api/editor/editPage";
+import CustomSnackbar from "../global/customSnackbar";
 
 export default function AccountAppBar() {
+  const [serverError, setServerError] = React.useState(null);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [addPageLoading, setAddPageLoading] = React.useState(false);
   const authData = React.useContext(AuthContext);
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
+
+  const closeErrorSnackbar = () => {
+    setServerError(null);
+  };
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -49,8 +57,18 @@ export default function AccountAppBar() {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const gotoAddPage = () => {
-    navigate("/pages/edit", { replace: false });
+  const gotoAddPage = async () => {
+    setAddPageLoading(true);
+    createPageWithDefaults().then(
+      () => {
+        navigate("/pages/edit", { replace: false });
+        setAddPageLoading(false);
+      },
+      (err) => {
+        setServerError(err.response?.data?.message ?? "An error occurred.");
+        setAddPageLoading(false);
+      }
+    );
   };
   const gotoProfile = () => {
     setAnchorEl(null);
@@ -76,7 +94,12 @@ export default function AccountAppBar() {
   return (
     <React.Fragment>
       <CssBaseline />
-
+      <CustomSnackbar
+        message={serverError}
+        severity="error"
+        open={serverError}
+        onClose={closeErrorSnackbar}
+      />
       <AppBar
         position="static"
         color="transparent"
@@ -101,7 +124,8 @@ export default function AccountAppBar() {
               startIcon={<Add fontSize="small" />}
               onClick={gotoAddPage}
               disabled={
-                !authData.canAccessFeature(ProductFeatures.AddEditContent)
+                !authData.canAccessFeature(ProductFeatures.AddEditContent) ||
+                addPageLoading
               }
             >
               New page
