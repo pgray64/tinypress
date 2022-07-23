@@ -23,9 +23,9 @@ import (
 
 type createPageForm struct {
 	Title         string `json:"title" validate:"required,max=255"`
-	RenderedHtml  string `json:"renderedHtml" validate:"required"`
-	RenderedCss   string `json:"renderedCss" validate:"required"`
-	EditorContent string `json:"editorContent" validate:"required"`
+	RenderedHtml  string `json:"renderedHtml"`
+	RenderedCss   string `json:"renderedCss"`
+	EditorContent string `json:"editorContent"`
 }
 type createPageResponse struct {
 	PageId int `json:"userId"`
