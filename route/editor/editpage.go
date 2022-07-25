@@ -28,7 +28,7 @@ type createPageForm struct {
 	EditorContent string `json:"editorContent"`
 }
 type createPageResponse struct {
-	PageId int `json:"userId"`
+	PageId int `json:"pageId"`
 }
 
 func CreatePage(c echo.Context) error {
@@ -65,6 +65,7 @@ type getPageWithDraftRequest struct {
 }
 type getPageWithDraftResponse struct {
 	PageId         int       `json:"pageId"`
+	PageTitle      string    `json:"pageTitle"`
 	PageCreatedAt  time.Time `json:"pageCreatedAt"`
 	DraftCreatedAt time.Time `json:"draftCreatedAt"`
 	EditorContent  string    `json:"editorContent"`
@@ -84,20 +85,21 @@ func GetPageWithDraft(c echo.Context) error {
 		return err
 	}
 	if pageWithDraft == nil {
-		return echo.ErrNotFound
+		return echo.NewHTTPError(http.StatusBadRequest, "Page does not exist")
 	}
 	return c.JSON(http.StatusOK, getPageWithDraftResponse{
 		PageId:         pageWithDraft.ID,
 		PageCreatedAt:  pageWithDraft.CreatedAt,
 		DraftCreatedAt: draft.CreatedAt,
 		EditorContent:  draft.EditorContent,
+		PageTitle:      pageWithDraft.Title,
 	})
 }
 
 type saveDraftRequest struct {
 	PageId        int    `json:"pageId" validate:"required,min=1"`
-	RenderedHtml  string `json:"renderedHtml" validate:"required"`
-	RenderedCss   string `json:"renderedCss" validate:"required"`
+	RenderedHtml  string `json:"renderedHtml"`
+	RenderedCss   string `json:"renderedCss"`
 	EditorContent string `json:"editorContent" validate:"required"`
 }
 

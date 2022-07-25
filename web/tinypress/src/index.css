@@ -23,3 +23,7 @@ code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+#grapes-js-editor {
+    height: 100vh !important;
+    min-width:920px !important;
+}

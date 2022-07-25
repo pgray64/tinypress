@@ -42,9 +42,14 @@ export function getPageWithDraft({ pageId }) {
   });
 }
 
-export function saveDraft({ title, renderedHtml, renderedCss, editorContent }) {
+export function saveDraft({
+  pageId,
+  renderedHtml,
+  renderedCss,
+  editorContent,
+}) {
   return api.post(baseUrl + "save-draft", {
-    title,
+    pageId,
     renderedHtml,
     renderedCss,
     editorContent,

@@ -24,7 +24,7 @@ import (
 
 type Page struct {
 	ID                  int    `gorm:"primaryKey;autoIncrement"`
-	Title               string `gorm:"not null;uniqueIndex;size:255"`
+	Title               string `gorm:"not null;size:255"`
 	PublishedRevisionId *int
 	PublishedRevision   ContentRevision `gorm:"PRELOAD:false"`
 	CreatedAt           time.Time       `gorm:"autoCreateTime"`
@@ -63,7 +63,7 @@ func (page *Page) Create(content *ContentRevision) (id int, isDup bool, err erro
 func GetPageWithDraft(pageId int) (*Page, *ContentRevision, error) {
 	var pages []Page
 	var drafts []ContentRevision
-	var selectPageRes = database.Database.Model(&Page{}).Where(map[string]interface{}{"pageId": pageId}).Find(&pages)
+	var selectPageRes = database.Database.Model(&Page{}).Where(map[string]interface{}{"id": pageId}).Find(&pages)
 	if selectPageRes.Error != nil {
 		return nil, nil, selectPageRes.Error
 	}
@@ -72,7 +72,7 @@ func GetPageWithDraft(pageId int) (*Page, *ContentRevision, error) {
 	}
 	var selectDraftRes = database.Database.Model(&ContentRevision{}).
 		Where(map[string]interface{}{"page_id": pageId}).
-		Order("pageId desc").
+		Order("id desc").
 		Limit(1).
 		Find(&drafts)
 	if selectDraftRes.Error != nil || len(drafts) < 1 {

@@ -15,7 +15,7 @@ import { Alert, Snackbar } from "@mui/material";
 export default function CustomSnackbar({ message, severity, open, onClose }) {
   return (
     <Snackbar
-      autoHideDuration={5000}
+      autoHideDuration={3000}
       open={open}
       onClose={onClose}
       anchorOrigin={{ vertical: "top", horizontal: "right" }}

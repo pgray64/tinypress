@@ -146,7 +146,7 @@ func GetUser(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 	if rawUser == nil {
-		return echo.ErrNotFound
+		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
 	}
 
 	var userResult = userResultItem{

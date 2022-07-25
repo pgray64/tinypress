@@ -60,8 +60,11 @@ export default function AccountAppBar() {
   const gotoAddPage = async () => {
     setAddPageLoading(true);
     createPageWithDefaults().then(
-      () => {
-        navigate("/pages/edit", { replace: false });
+      (res) => {
+        navigate("/pages/edit/" + res.data.pageId, {
+          replace: false,
+          reloadDocument: true,
+        });
         setAddPageLoading(false);
       },
       (err) => {
