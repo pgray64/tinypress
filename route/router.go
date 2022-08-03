@@ -91,6 +91,7 @@ func InitRoutes() *echo.Echo {
 	authenticatedRoutes.POST("page-editor/get-page-with-draft", editor.GetPageWithDraft, authentication.RequireProductFeatureMiddleware(productfeature.AddEditContent))
 	authenticatedRoutes.POST("page-editor/save-draft", editor.SaveDraft, authentication.RequireProductFeatureMiddleware(productfeature.AddEditContent))
 	authenticatedRoutes.POST("page-editor/publish-draft", editor.PublishDraft, authentication.RequireProductFeatureMiddleware(productfeature.AddEditContent))
+	authenticatedRoutes.POST("page-editor/list-recently-edited", editor.ListRecentlyEditedPages, authentication.RequireProductFeatureMiddleware(productfeature.AddEditContent))
 
 	/***** ADMIN ROUTES *****/
 	authenticatedRoutes.POST("admin/users/add-user", admin.AddUser, authentication.RequireProductFeatureMiddleware(productfeature.ManageUsers))
