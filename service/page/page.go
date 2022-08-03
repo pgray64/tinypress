@@ -89,11 +89,22 @@ func SaveDraft(draft *ContentRevision) error {
 	return insertRes.Error
 }
 
+func UpdateRecentlyEditedPage(pageId int) error {
+	if pageId < 1 {
+		return errors.New("page id is invalid")
+	}
+	var updateRes = database.Database.Model(&Page{}).
+		Where(map[string]interface{}{"id": pageId}).
+		Updates(&Page{UpdatedAt: time.Now()})
+	return updateRes.Error
+}
+
 func PublishDraft(draftId int) error {
 	if draftId < 1 {
 		return errors.New("draft id is invalid")
 	}
 	var drafts []ContentRevision
+	// Doing this will prevent publishing a soft-deleted draft
 	var selectRes = database.Database.Model(&ContentRevision{}).Where(map[string]interface{}{"id": draftId}).Find(&drafts)
 	if selectRes.Error != nil {
 		return selectRes.Error
@@ -107,4 +118,18 @@ func PublishDraft(draftId int) error {
 		PublishedRevisionId: &draft.ID,
 	})
 	return updateRes.Error
+}
+
+func ListRecentlyEditedPages(page int, perPage int) (pages []Page, totalCount int64, err error) {
+	countRes := database.Database.Model(&Page{}).Count(&totalCount)
+	if countRes.Error != nil {
+		return pages, 0, countRes.Error
+	}
+	offset := perPage * page
+	var selectRes = database.Database.Model(&Page{}).
+		Offset(offset).
+		Limit(perPage).
+		Order("updated_at desc").
+		Find(&pages)
+	return pages, totalCount, selectRes.Error
 }

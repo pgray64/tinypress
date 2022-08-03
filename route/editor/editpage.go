@@ -16,6 +16,7 @@ package editor
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/pgray64/tinypress/service/page"
+	"math"
 	"net/http"
 	"strings"
 	"time"
@@ -121,6 +122,13 @@ func SaveDraft(c echo.Context) error {
 	if err != nil {
 		return echo.ErrInternalServerError
 	}
+
+	// Saving draft doesn't touch Page table, so need to manually updated "updatedAt"
+	err = page.UpdateRecentlyEditedPage(request.PageId)
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+
 	return c.JSON(http.StatusOK, new(struct{}))
 }
 
@@ -142,4 +150,43 @@ func PublishDraft(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 	return c.JSON(http.StatusOK, new(struct{}))
+}
+
+const ListPagesPerPage = 10
+
+type listPagesResultItem struct {
+	ID    int    `json:"id"`
+	Title string `json:"title"`
+}
+type listPagesResult struct {
+	PageList  []listPagesResultItem ` json:"pageList"`
+	PageCount int64                 `json:"pageCount"`
+}
+type listPagesRequest struct {
+	Page int `json:"page"`
+}
+
+func ListRecentlyEditedPages(c echo.Context) error {
+	paging := new(listPagesRequest)
+	if err := c.Bind(paging); err != nil {
+		return echo.ErrInternalServerError
+	}
+	var rawPages, totalCount, err = page.ListRecentlyEditedPages(paging.Page, ListPagesPerPage)
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+
+	var listPagesResults = make([]listPagesResultItem, len(rawPages))
+
+	for i, row := range rawPages {
+		listPagesResults[i] = listPagesResultItem{
+			ID:    row.ID,
+			Title: row.Title,
+		}
+	}
+	var result = listPagesResult{
+		PageCount: int64(math.Ceil(float64(totalCount) / float64(ListPagesPerPage))),
+		PageList:  listPagesResults,
+	}
+	return c.JSON(http.StatusOK, result)
 }
